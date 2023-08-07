@@ -84,6 +84,9 @@ class Trainer(object):
             'acc':acc
         }, step=self.num_steps)
 
+        self.epoch_tr_loss += loss * img.size(0)
+        self.epoch_tr_corr += out.argmax(dim=-1).eq(label).sum(-1)
+
 
     # @torch.no_grad
     def _test_one_step(self, batch):
@@ -101,12 +104,19 @@ class Trainer(object):
 
     def fit(self, train_dl, test_dl):
         for epoch in range(1, self.epochs+1):
+            num_tr_imgs = 0.
+            self.epoch_tr_loss, self.epoch_tr_corr, self.epoch_tr_acc = 0., 0., 0.
             for batch in train_dl:
                 self._train_one_step(batch)
+                num_tr_imgs += batch[0].size(0)
+            self.epoch_tr_loss /= num_tr_imgs
+            self.epoch_tr_acc = self.epoch_tr_corr / num_tr_imgs
             wandb.log({
                 'epoch': epoch, 
                 # 'lr': self.scheduler.get_last_lr(),
-                'lr':self.optimizer.param_groups[0]["lr"]
+                'lr':self.optimizer.param_groups[0]["lr"],
+                'epoch_tr_loss': self.epoch_tr_loss,
+                'epoch_tr_acc': self.epoch_tr_acc
                 }, step=self.num_steps
             )
             self.scheduler.step()
