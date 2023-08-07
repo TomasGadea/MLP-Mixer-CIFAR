@@ -2,7 +2,8 @@ import argparse
 
 import torch
 import wandb
-wandb.login()
+import os
+wandb.login(key=os.environ["WANDB_API_KEY"])
 
 from dataloader import get_dataloaders
 from utils import get_model
