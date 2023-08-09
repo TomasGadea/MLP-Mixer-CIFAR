@@ -105,7 +105,7 @@ class Trainer(object):
             loss = self.criterion(out, label)
 
         self.epoch_loss += loss * img.size(0)
-        self.epoch_corr += out.argmax(dim=-1).eq(label.argmax(dim=-1)).sum(-1)
+        self.epoch_corr += out.argmax(dim=-1).eq(label).sum(-1)
 
 
     def fit(self, train_dl, test_dl):
