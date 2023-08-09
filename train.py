@@ -53,7 +53,9 @@ class Trainer(object):
         img, label = batch
         self.num_steps += 1
         img, label = img.to(self.device), label.to(self.device)
+        print(label.shape)
         img, label = mixup_fn(img, label)
+        print(label.shape)
 
         self.optimizer.zero_grad()
         """
@@ -112,7 +114,8 @@ class Trainer(object):
         mixup_fn = Mixup(
             cutmix_alpha=self.cutmix_beta,
             prob=self.cutmix_prob,
-            label_smoothing=self.label_smoothing
+            label_smoothing=self.label_smoothing,
+            num_classes=10,
         )
         for epoch in range(1, self.epochs+1):
             num_tr_imgs = 0.
