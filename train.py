@@ -86,14 +86,14 @@ class Trainer(object):
         self.scaler.step(self.optimizer)
         self.scaler.update()
 
-        acc = out.argmax(dim=-1).eq(label).sum(-1)/img.size(0)
+        acc = out.argmax(dim=-1).eq(label.argmax(dim=-1)).sum(-1)/img.size(0)
         wandb.log({
             'loss':loss,
             'acc':acc
         }, step=self.num_steps)
 
         self.epoch_tr_loss += loss * img.size(0)
-        self.epoch_tr_corr += out.argmax(dim=-1).eq(label).sum(-1)
+        self.epoch_tr_corr += out.argmax(dim=-1).eq(label.argmax(dim=-1)).sum(-1)
 
 
     # @torch.no_grad
@@ -107,7 +107,7 @@ class Trainer(object):
             loss = self.criterion(out, label)
 
         self.epoch_loss += loss * img.size(0)
-        self.epoch_corr += out.argmax(dim=-1).eq(label).sum(-1)
+        self.epoch_corr += out.argmax(dim=-1).eq(label.argmax(dim=-1)).sum(-1)
 
 
     def fit(self, train_dl, test_dl):
