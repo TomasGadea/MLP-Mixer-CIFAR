@@ -53,9 +53,7 @@ class Trainer(object):
         img, label = batch
         self.num_steps += 1
         img, label = img.to(self.device), label.to(self.device)
-        print(label.shape)
         img, label = mixup_fn(img, label)
-        print(label.shape)
 
         self.optimizer.zero_grad()
         """
