@@ -28,14 +28,14 @@ def get_dataloaders(args):
 
     if args.valid_ratio > 0:
         # # divide the training set into validation and training set.
-        instance_num = len(trainset)
+        instance_num = len(train_ds)
         indices = list(range(instance_num))
-        split_pt = int(instance_num * valid_ratio)
+        split_pt = int(instance_num * args.valid_ratio)
         train_idx, valid_idx = indices[split_pt:], indices[:split_pt]
-        train_sampler, valid_sampler = SubsetRandomSampler(train_idx), SubsetRandomSampler(valid_idx)
+        train_sampler, valid_sampler = torch.utils.data.SubsetRandomSampler(train_idx), torch.utils.data.SubsetRandomSampler(valid_idx)
 
-        train_dl = DataLoader(trainset, batch_size=batch_size, sampler=train_sampler, shuffle=True, num_workers=args.num_workers, pin_memory=True)
-        valid_dl = DataLoader(trainset, batch_size=batch_size, sampler=valid_sampler, shuffle=True, num_workers=args.num_workers, pin_memory=True)
+        train_dl = torch.utils.data.DataLoader(train_ds, batch_size=args.batch_size, sampler=train_sampler, num_workers=args.num_workers, pin_memory=True)
+        valid_dl = torch.utils.data.DataLoader(train_ds, batch_size=args.batch_size, sampler=valid_sampler, num_workers=args.num_workers, pin_memory=True)
     else:
         train_dl = torch.utils.data.DataLoader(train_ds, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, pin_memory=True)
         valid_dl = None
