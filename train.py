@@ -102,7 +102,7 @@ class Trainer(object):
         self.epoch_corr += out.argmax(dim=-1).eq(label).sum(-1)
 
 
-    def fit(self, train_dl, test_dl):
+    def fit(self, train_dl, valid_dl, test_dl):
         for epoch in range(1, self.epochs+1):
             num_tr_imgs = 0.
             self.epoch_tr_loss, self.epoch_tr_corr, self.epoch_tr_acc = 0., 0., 0.
@@ -124,7 +124,7 @@ class Trainer(object):
             
             num_imgs = 0.
             self.epoch_loss, self.epoch_corr, self.epoch_acc = 0., 0., 0.
-            for batch in test_dl:
+            for batch in valid_dl:
                 self._test_one_step(batch)
                 num_imgs += batch[0].size(0)
             self.epoch_loss /= num_imgs

@@ -65,7 +65,7 @@ if args.is_cls_token:
 
 if __name__=='__main__':
     with wandb.init(project='mlp_mixer', config=args, name=experiment_name):
-        train_dl, test_dl = get_dataloaders(args)
+        train_dl, valid_dl, test_dl = get_dataloaders(args)
         model = get_model(args)
         trainer = Trainer(model, args)
-        trainer.fit(train_dl, test_dl)
+        trainer.fit(train_dl, valid_dl, test_dl)
