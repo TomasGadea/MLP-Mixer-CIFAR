@@ -14,7 +14,7 @@ parser.add_argument('--dataset', required=True, choices=['c10', 'c100', 'svhn'])
 parser.add_argument('--model', required=True, choices=['mlp_mixer'])
 parser.add_argument('--batch-size', type=int, default=128)
 parser.add_argument('--eval-batch-size', type=int, default=1024)
-parser.add_argument('--valid_ratio', type=float, default=0.2)
+parser.add_argument('--valid_ratio', type=float, default=0.5)
 parser.add_argument('--num-workers', type=int, default=4)
 parser.add_argument('--seed', type=int, default=3407)
 parser.add_argument('--epochs', type=int, default=300)
@@ -66,7 +66,7 @@ if args.is_cls_token:
 
 if __name__=='__main__':
     with wandb.init(project='mlp_mixer', config=args, name=experiment_name):
-        train_dl, test_dl = get_dataloaders(args)
+        train_dl, valid_dl, test_dl = get_dataloaders(args)
         model = get_model(args)
         trainer = Trainer(model, args)
-        trainer.fit(train_dl, test_dl)
+        trainer.fit(train_dl, valid_dl, test_dl)

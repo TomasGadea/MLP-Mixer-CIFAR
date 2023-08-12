@@ -25,10 +25,29 @@ def get_dataloaders(args):
     else:
         raise ValueError(f"No such dataset:{args.dataset}")
 
-    train_dl = torch.utils.data.DataLoader(train_ds, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, pin_memory=True)
+    if args.valid_ratio > 0:
+        num_train = len(train_data)
+        indices = list(range(num_train))
+        split = int(np.floor(args.train_portion * num_train))
+
+        train_dl = torch.utils.data.DataLoader(
+            train_ds, batch_size=args.batch_size,
+            sampler=torch.utils.data.sampler.SubsetRandomSampler(indices[:split]),
+            num_workers=args.num_workers, pin_memory=True)
+
+        valid_dl = torch.utils.data.DataLoader(
+            train_ds, batch_size=args.batch_size,
+            sampler=torch.utils.data.sampler.SubsetRandomSampler(indices[split:num_train]),
+            num_workers=args.num_workers, pin_memory=True)
+
+    else:
+        train_dl = torch.utils.data.DataLoader(train_ds, batch_size=args.batch_size, shuffle=True,
+                                               num_workers=args.num_workers, pin_memory=True)
+        valid_dl = None
+
     test_dl = torch.utils.data.DataLoader(test_ds, batch_size=args.eval_batch_size, shuffle=False, num_workers=args.num_workers, pin_memory=True)
 
-    return train_dl, test_dl
+    return train_dl, valid_dl, test_dl
 
 def get_transform(args):
     if args.dataset in ["c10", "c100", 'svhn']:
