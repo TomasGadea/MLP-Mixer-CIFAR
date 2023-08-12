@@ -26,9 +26,9 @@ def get_dataloaders(args):
         raise ValueError(f"No such dataset:{args.dataset}")
 
     if args.valid_ratio > 0:
-        num_train = len(train_data)
+        num_train = len(train_ds)
         indices = list(range(num_train))
-        split = int(np.floor(args.train_portion * num_train))
+        split = int(np.floor(args.valid_ratio * num_train))
 
         train_dl = torch.utils.data.DataLoader(
             train_ds, batch_size=args.batch_size,
