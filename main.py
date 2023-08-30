@@ -1,5 +1,6 @@
 import argparse
 import torch
+import random
 import wandb
 import os
 import json
@@ -18,7 +19,7 @@ parser.add_argument('--batch-size', type=int, default=128)
 parser.add_argument('--eval-batch-size', type=int, default=1024)
 parser.add_argument('--valid-ratio', type=float, default=0.5)
 parser.add_argument('--num-workers', type=int, default=4)
-parser.add_argument('--seed', type=int, default=3407)
+parser.add_argument('--seed', type=int, default=random.randint(1, 1e5))
 parser.add_argument('--epochs', type=int, default=300)
 # parser.add_argument('--precision', type=int, default=16)
 
