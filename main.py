@@ -1,8 +1,8 @@
 import argparse
-
 import torch
 import wandb
 import os
+import json
 wandb.login(key=os.environ["WANDB_API_KEY"])
 
 from dataloader import get_dataloaders
@@ -10,6 +10,8 @@ from utils import get_model
 from train import Trainer
 
 parser = argparse.ArgumentParser()
+parser.add_argument('--output', type=str, default=f"./out")
+parser.add_argument('--experiment', type=str, default=f"experiment_{datetime.now().strftime('%Y-%m-%d_%H:%M:%S')}")
 parser.add_argument('--dataset', required=True, choices=['c10', 'c100', 'svhn'])
 parser.add_argument('--model', required=True, choices=['mlp_mixer'])
 parser.add_argument('--batch-size', type=int, default=128)
@@ -66,7 +68,15 @@ if args.is_cls_token:
 
 if __name__=='__main__':
     with wandb.init(project='mlp_mixer', config=args, name=experiment_name):
+        config = args.__dict__.copy()
+        config['device'] = config['device'].__str__()
+        path = os.path.join(args.output, args.experiment)
+        os.makedirs(path, exist_ok=True)
+        with open(path + '/params.json', 'w') as ff:
+            json.dump(config, ff, indent=4, sort_keys=True)
+
         train_dl, valid_dl, test_dl = get_dataloaders(args)
         model = get_model(args)
         trainer = Trainer(model, args)
-        trainer.fit(train_dl, valid_dl, test_dl)
+        trainer.fit(train_dl, valid_dl, test_dl, args)
+

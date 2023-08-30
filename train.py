@@ -6,6 +6,7 @@ import wandb
 import warmup_scheduler
 import numpy as np
 from timm.data.mixup import Mixup
+import os
 
 
 from utils import rand_bbox
@@ -108,7 +109,7 @@ class Trainer(object):
         self.epoch_corr += out.argmax(dim=-1).eq(label).sum(-1)
 
 
-    def fit(self, train_dl, valid_dl, test_dl):
+    def fit(self, train_dl, valid_dl, test_dl, args):
         mixup_fn = Mixup(
             cutmix_alpha=self.cutmix_beta,
             prob=self.cutmix_prob,
@@ -146,3 +147,8 @@ class Trainer(object):
                 'val_acc': self.epoch_acc
                 }, step=self.num_steps
             )
+
+            # save model weights
+            os.makedirs(os.path.join(args.output, args.experiment), exist_ok=True)
+            torch.save(self.model.state_dict(),
+                       os.path.join(args.output, args.experiment, f'W-{args.model}_' + args.dataset + '_last.pt'))
