@@ -86,10 +86,10 @@ class Trainer(object):
         self.scaler.update()
 
         acc = out.argmax(dim=-1).eq(label.argmax(dim=-1)).sum(-1)/img.size(0)
-        wandb.log({
-            'loss':loss,
-            'acc':acc
-        }, step=self.num_steps)
+        #wandb.log({
+        #    'loss':loss,
+        #    'acc':acc
+        #}, step=self.num_steps)
 
         self.epoch_tr_loss += loss * img.size(0)
         self.epoch_tr_corr += out.argmax(dim=-1).eq(label.argmax(dim=-1)).sum(-1)
@@ -125,12 +125,12 @@ class Trainer(object):
             self.epoch_tr_loss /= num_tr_imgs
             self.epoch_tr_acc = self.epoch_tr_corr / num_tr_imgs
             wandb.log({
-                'epoch': epoch, 
+                #'epoch': epoch,
                 # 'lr': self.scheduler.get_last_lr(),
-                'lr':self.optimizer.param_groups[0]["lr"],
+                'lr': self.optimizer.param_groups[0]["lr"],
                 'epoch_tr_loss': self.epoch_tr_loss,
                 'epoch_tr_acc': self.epoch_tr_acc
-                }, step=self.num_steps
+                }, step=epoch
             )
             self.scheduler.step()
 
@@ -145,7 +145,7 @@ class Trainer(object):
             wandb.log({
                 'val_loss': self.epoch_loss,
                 'val_acc': self.epoch_acc
-                }, step=self.num_steps
+                }, step=epoch
             )
 
             # save model weights
