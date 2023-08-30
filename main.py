@@ -11,6 +11,7 @@ from utils import get_model
 from train import Trainer
 
 parser = argparse.ArgumentParser()
+parser.add_argument('--project', type=str, default="mlp_mixer")
 parser.add_argument('--output', type=str, default=f"./out")
 parser.add_argument('--experiment', type=str, default=f"experiment_{datetime.now().strftime('%Y-%m-%d_%H:%M:%S')}")
 parser.add_argument('--dataset', required=True, choices=['c10', 'c100', 'svhn'])
@@ -68,7 +69,7 @@ if args.is_cls_token:
 
 
 if __name__=='__main__':
-    with wandb.init(project='mlp_mixer', config=args, name=experiment_name):
+    with wandb.init(project=args.project, config=args, name=experiment_name):
         config = args.__dict__.copy()
         config['device'] = config['device'].__str__()
         path = os.path.join(args.output, args.experiment)
