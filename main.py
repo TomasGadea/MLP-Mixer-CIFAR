@@ -57,7 +57,7 @@ args.nesterov = not args.off_nesterov
 torch.random.manual_seed(args.seed)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     with wandb.init(project=args.project, config=args, name=args.experiment):
         config = args.__dict__.copy()
         config['device'] = config['device'].__str__()
