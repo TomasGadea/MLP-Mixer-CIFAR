@@ -11,6 +11,7 @@ class MLPMixer(nn.Module):
         num_patches = img_size // patch_size * img_size // patch_size
         # (b, c, h, w) -> (b, d, h//p, w//p) -> (b, h//p*w//p, d)
         self.is_cls_token = is_cls_token
+        self.num_layers = num_layers
 
         self.patch_emb = nn.Sequential(
             nn.Conv2d(in_channels, hidden_size ,kernel_size=patch_size, stride=patch_size),
@@ -32,7 +33,6 @@ class MLPMixer(nn.Module):
 
         self.clf = nn.Linear(hidden_size, num_classes)
 
-
     def forward(self, x):
         out = self.patch_emb(x)
         if self.is_cls_token:
@@ -42,6 +42,39 @@ class MLPMixer(nn.Module):
         out = out[:, 0] if self.is_cls_token else out.mean(dim=1)
         out = self.clf(out)
         return out
+
+    def L1L2_reg(self):
+        """
+        we get: torch.nn.parameter.Parameter
+        c --> cell index
+        i --> index in range 0..len(hidden_s_candidates)
+        j --> index in range 0..len(hidden_c_candidates)
+
+        model.cells[c].mlp1.mixed_op.ops[i][0].weight
+        model.cells[c].mlp1.mixed_op.ops[i][3].weight
+
+        model.cells[c].mlp2.mixed_op.ops[j][0].weight
+        model.cells[c].mlp2.mixed_op.ops[j][3].weight
+
+        """
+        all_W = []
+        for l in range(self.num_layers):
+            all_W.append(self.mixer_layers[l].mlp1.fc1.weight)
+            all_W.append(self.mixer_layers[l].mlp1.fc2.weight)
+            all_W.append(self.mixer_layers[l].mlp2.fc1.weight)
+            all_W.append(self.mixer_layers[l].mlp2.fc2.weight)
+        all_W.append(self.clf.weight)
+
+        row_reg = torch.cat([torch.norm(W, p=2, dim=1) for W in all_W])  # 1 x (L*H)
+        reg = torch.norm(row_reg, p=1)  # 1 x 1
+        return reg
+
+    def friction(self):
+        F = 0.
+        for l in range(self.num_layers):
+            F += self.mixer_layers[l].mlp1.fc1.out_features
+            F += self.mixer_layers[l].mlp2.fc1.out_features
+        return F
 
 
 class MixerLayer(nn.Module):

@@ -1,6 +1,7 @@
 import argparse
 import torch
 import random
+from datetime import datetime
 import wandb
 import os
 import json
@@ -11,6 +12,7 @@ from utils import get_model
 from train import Trainer
 
 parser = argparse.ArgumentParser()
+parser.add_argument('--project', type=str, default="mlp_mixer")
 parser.add_argument('--output', type=str, default=f"./out")
 parser.add_argument('--experiment', type=str, default=f"experiment_{datetime.now().strftime('%Y-%m-%d_%H:%M:%S')}")
 parser.add_argument('--dataset', required=True, choices=['c10', 'c100', 'svhn'])
@@ -54,21 +56,9 @@ args.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 args.nesterov = not args.off_nesterov
 torch.random.manual_seed(args.seed)
 
-experiment_name = f"{args.model}_{args.dataset}_{args.optimizer}_{args.scheduler}"
-if args.autoaugment:
-    experiment_name += "_aa"
-if args.clip_grad:
-    experiment_name += f"_cg{args.clip_grad}"
-if args.off_act:
-    experiment_name += f"_noact"
-if args.cutmix_prob>0.:
-    experiment_name += f'_cm'
-if args.is_cls_token:
-    experiment_name += f"_cls"
 
-
-if __name__=='__main__':
-    with wandb.init(project='mlp_mixer', config=args, name=experiment_name):
+if __name__ == '__main__':
+    with wandb.init(project=args.project, config=args, name=args.experiment):
         config = args.__dict__.copy()
         config['device'] = config['device'].__str__()
         path = os.path.join(args.output, args.experiment)
