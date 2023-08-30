@@ -10,4 +10,4 @@ CUDA_LAUNCH_BLOCKING=1 CUDA_VISIBLE_DEVICES=4 python3 main.py \
 	--hidden-size 128 \
 	--hidden-c 512 \
 	--hidden-s 64 \
-	--num-layers 5 \
+	--num-layers 3 \
