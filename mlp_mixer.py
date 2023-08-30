@@ -69,6 +69,13 @@ class MLPMixer(nn.Module):
         reg = torch.norm(row_reg, p=1)  # 1 x 1
         return reg
 
+    def friction(self):
+        F = 0.
+        for l in range(self.num_layers):
+            F += self.mixer_layers[l].mlp1.fc1.out_features
+            F += self.mixer_layers[l].mlp2.fc1.out_features
+        return F
+
 
 class MixerLayer(nn.Module):
     def __init__(self, num_patches, hidden_size, hidden_s, hidden_c, drop_p, off_act):
