@@ -5,6 +5,7 @@ import torch.optim as optim
 import wandb
 import warmup_scheduler
 import numpy as np
+import pandas as pd
 from timm.data.mixup import Mixup
 import os
 
@@ -110,6 +111,7 @@ class Trainer(object):
 
 
     def fit(self, train_dl, valid_dl, test_dl, args):
+        df = {'epoch': [], 'train_loss': [], 'valid_loss': [], 'train_acc': [], 'valid_acc': [], 'friction': []}
         mixup_fn = Mixup(
             cutmix_alpha=self.cutmix_beta,
             prob=self.cutmix_prob,
@@ -118,7 +120,7 @@ class Trainer(object):
         )
         for epoch in range(1, self.epochs+1):
             num_tr_imgs = 0.
-            self.epoch_tr_loss, self.epoch_tr_corr, self.epoch_tr_acc = 0., 0., 0.
+            self.epoch_tr_loss, self.epoch_friction, self.epoch_tr_corr, self.epoch_tr_acc = 0., 0., 0., 0.
             for batch in train_dl:
                 self._train_one_step(batch, mixup_fn)
                 num_tr_imgs += batch[0].size(0)
@@ -134,6 +136,11 @@ class Trainer(object):
             )
             self.scheduler.step()
 
+            df['epoch'].append(epoch)
+            df['train_acc'].append(self.epoch_tr_acc.item())
+            df['train_loss'].append(self.epoch_tr_loss.item())
+            df['friction'].append(self.epoch_friction)
+
             
             num_imgs = 0.
             self.epoch_loss, self.epoch_corr, self.epoch_acc = 0., 0., 0.
@@ -148,7 +155,14 @@ class Trainer(object):
                 }, step=epoch
             )
 
+            df['valid_loss'].append(self.epoch_loss.item())
+            df['valid_acc'].append(self.epoch_acc.item())
+
             # save model weights
             os.makedirs(os.path.join(args.output, args.experiment), exist_ok=True)
             torch.save(self.model.state_dict(),
                        os.path.join(args.output, args.experiment, f'W-{args.model}_' + args.dataset + '_last.pt'))
+
+            pd_df = pd.DataFrame.from_dict(df, orient='columns')
+            pd_df.to_csv(os.path.join(args.output, args.experiment, f'LOG_{args.model}_{args.dataset}.csv'),
+                         index=False, float_format='%g')
