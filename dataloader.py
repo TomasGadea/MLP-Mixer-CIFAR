@@ -47,6 +47,9 @@ def get_dataloaders(args):
 
     test_dl = torch.utils.data.DataLoader(test_ds, batch_size=args.eval_batch_size, shuffle=False, num_workers=args.num_workers, pin_memory=True)
 
+    if valid_dl is None:
+        valid_dl = test_dl
+
     return train_dl, valid_dl, test_dl
 
 def get_transform(args):
